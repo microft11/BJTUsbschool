@@ -1,0 +1,36 @@
+
+#ifndef __MYSTRING_H__
+#define __MYSTRING_H__
+#include<iostream>
+#include<string.h>
+using namespace std;
+class MyString
+{
+	static int total; // 此处声明为私有数据成员
+public:
+	MyString();
+	MyString(const char* p);
+	MyString(const MyString& s);
+	~MyString();
+	MyString& operator=(const MyString& s);
+	// 取得字符串的首地址
+	const char* get_string() const { return m_pbuf; }
+	// 将 p 指向的字符串保存在MyString类中
+	const char* set_string(const char* p = NULL);
+	// 将 p 指向的字符串追加到原有字符串之后
+	const char* append(const char* p = NULL);
+	// 将 s 对象中的字符串追加到当前对象的字符串之后并返回对象
+	MyString& append(MyString& s);
+	// 取得保存的字符串的长度
+	int get_length() const { return strlen(m_pbuf); }
+	static int get_total() { return total; }
+	MyString& read_text(istream& in); //文本模式读取函数
+	MyString& read_binary(istream& in); //二进制模式读取函数
+	void write_text(ostream& o); //文本模式输出函数
+	void write_binary(ostream& o); //二进制模式输出函数
+	//插入符，文本模式
+	friend ostream& operator<< (ostream& o, const MyString& s);
+private:
+	char* m_pbuf;
+};
+#endif
