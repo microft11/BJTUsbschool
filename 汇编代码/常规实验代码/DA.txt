@@ -1,0 +1,44 @@
+
+DATA SEGMENT
+SIN  db 80h,96h,0aeh,0c5h,0d8h,0e9h,0f5h,0fdh
+     db 0ffh,0fdh,0f5h,0e9h,0d8h,0c5h,0aeh,96h
+     db 80h,66h,4eh,38h,25h,15h,09h,04h
+     db 00h,04h,09h,15h,25h,38h,4eh,66h          
+LEN EQU $-SIN
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE,DS:DATA
+START:
+    MOV AX,DATA;
+    MOV DS,AX;
+    MOV SI, OFFSET SIN
+    MOV BH,LEN
+    MOV DX,290H
+    MOV AL,0H
+    OUT DX,AL
+AGAIN:
+    MOV SI,OFFSET SIN
+    MOV BH,LEN
+
+LP:
+    MOV AL,[SI];
+    OUT DX,AL
+    
+    MOV BL,AL;
+    MOV AH,0BH;
+    INT 21H;
+    CMP AL,0FFH;
+    JE STOP;
+    MOV AL,BL;
+    INC SI;
+    DEC BH;
+    JNZ LP
+    JMP AGAIN
+    
+
+STOP:
+    MOV AH,4CH              
+    INT 21H
+CODE ENDS
+    END START
