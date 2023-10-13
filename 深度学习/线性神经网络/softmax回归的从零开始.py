@@ -1,5 +1,7 @@
 import torch
 import torchvision
+import matplotlib.pyplot as plt
+from IPython import display
 from torch.utils import data
 from torchvision import transforms
 
@@ -102,10 +104,7 @@ def accuracy(y_hat, y):  # @save
 class Accumulator:
     """在n个变量上累加"""
 
-    def __init__(self):
-        self.data = None
-
-    def __int__(self, n):
+    def __init__(self, n):
         self.data = [0.0] * n
 
     def add(self, *args):
@@ -130,7 +129,7 @@ def evaluate_accuracy(net, data_iter):
 
 
 # 训练
-def train_epoch_ch3(net, train_iter, loss, updater):
+def train_epoch(net, train_iter, loss, updater):
     if isinstance(net, torch.nn.Module):
         net.train()
     metric = Accumulator(3)
@@ -148,3 +147,125 @@ def train_epoch_ch3(net, train_iter, loss, updater):
 
     return metric[0] / metric[2], metric[1] / metric[2]
 
+
+def sgd(params, lr, batch_size):  # @save
+    """小批量随机梯度下降"""
+    for param in params:
+        param[:] = param - lr * param.grad / batch_size
+
+
+lr = 0.1
+
+
+def updater(batch_size):
+    return sgd([W, b], lr, batch_size)
+
+
+class Animator:
+    def __init__(self, xlabel=None, ylabel=None, legend=None, xlim=None,
+                 ylim=None, xscale='linear', yscale='linear',
+                 fmts=('-', 'm--', 'g-.', 'r:'), nrows=1, ncols=1,
+                 figsize=(3.5, 2.5)):
+        if legend is None:
+            legend = []
+        self.fig, self.axes = plt.subplots(nrows, ncols, figsize=figsize)
+        if nrows * ncols == 1:
+            self.axes = [self.axes, ]
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.xlim = xlim
+        self.ylim = ylim
+        self.xscale = xscale
+        self.yscale = yscale
+        self.legend = legend
+        self.fmts = fmts
+        self.X, self.Y = None, None
+
+    def config_axes(self):
+        if self.xlabel:
+            self.axes[0].set_xlabel(self.xlabel)
+        if self.ylabel:
+            self.axes[0].set_ylabel(self.ylabel)
+        if self.xlim:
+            self.axes[0].set_xlim(self.xlim)
+        if self.ylim:
+            self.axes[0].set_ylim(self.ylim)
+        self.axes[0].set_xscale(self.xscale)
+        self.axes[0].set_yscale(self.yscale)
+        if self.legend:
+            self.axes[0].legend(self.legend)
+
+    def add(self, x, y):
+        if not hasattr(y, "__len__"):
+            y = [y]
+        n = len(y)
+        if not hasattr(x, "__len__"):
+            x = [x] * n
+        if not self.X:
+            self.X = [[] for _ in range(n)]
+        if not self.Y:
+            self.Y = [[] for _ in range(n)]
+        for i, (a, b) in enumerate(zip(x, y)):
+            if a is not None and b is not None:
+                self.X[i].append(a)
+                self.Y[i].append(b)
+        self.axes[0].cla()
+        for x, y, fmt in zip(self.X, self.Y, self.fmts):
+            self.axes[0].plot(x, y, fmt)
+        self.config_axes()
+        display.display(self.fig)
+        display.clear_output(wait=True)
+
+
+def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):  # @save
+    """训练模型"""
+    animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],
+                        legend=['train loss', 'train acc', 'test acc'])
+    for epoch in range(num_epochs):
+        train_metrics = train_epoch(net, train_iter, loss, updater)
+        test_acc = evaluate_accuracy(net, test_iter)
+        animator.add(epoch + 1, train_metrics + (test_acc,))
+    train_loss, train_acc = train_metrics
+    assert train_loss < 0.5, train_loss
+    assert train_acc <= 1 and train_acc > 0.7, train_acc
+    assert test_acc <= 1 and test_acc > 0.7, test_acc
+
+
+#     assert 语句用于断言一些条件是否满足，确保训练进展顺利。
+#     具体来说，它断言训练损失小于0.5，训练准确度在0.7到1之间，测试准确度也在0.7到1之间。
+#     如果这些条件不满足，将引发断言错误。这有助于及早检测到训练过程中的问题
+
+
+num_epochs = 10
+train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
+
+
+def predict_ch3(net, test_iter, n=6):
+    for X, y in test_iter:
+        break
+    trues = get_fashion_mnist_labels(y)
+    preds = get_fashion_mnist_labels(net(X).argmax(axis=1))
+    titles = [true + '\n' + pred for true, pred in zip(trues, preds)]
+    show_images(X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
+
+
+def get_fashion_mnist_labels(labels):
+    text_labels = ['t-shirt', 'trouser', 'pullover', 'dress', 'coat',
+                   'sandal', 'shirt', 'sneaker', 'bag', 'ankle boot']
+    return [text_labels[int(i)] for i in labels]
+
+
+def show_images(images, num_rows, num_cols, titles=None, scale=1.5):
+    figsize = (num_cols * scale, num_rows * scale)
+    _, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
+    axes = axes.flatten()
+    for i, (ax, img) in enumerate(zip(axes, images)):
+        ax.imshow(img, cmap='gray')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+        if titles:
+            ax.set_title(titles[i])
+    plt.show()
+
+
+predict_ch3(net, test_iter)
