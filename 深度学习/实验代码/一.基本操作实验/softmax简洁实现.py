@@ -1,28 +1,23 @@
 import torch
 import torchvision
+from matplotlib import pyplot as plt
 from torch import nn
 from torchvision.transforms import transforms
 
 batch_size = 256
 
 
-def load_data_fashion_mnist(batch_size, resize=None):  # @save
-    """下载Fashion-MNIST数据集，然后将其加载到内存中"""
-    trans = [transforms.ToTensor()]
-    if resize:
-        trans.insert(0, transforms.Resize(resize))
-    trans = transforms.Compose(trans)
-    mnist_train = torchvision.datasets.FashionMNIST(
-        root="../data", train=True, transform=trans, download=True)
-    mnist_test = torchvision.datasets.FashionMNIST(
-        root="../data", train=False, transform=trans, download=True)
-    return (torch.utils.data.DataLoader(mnist_train, batch_size, shuffle=True,
-                                        num_workers=4),
-            torch.utils.data.DataLoader(mnist_test, batch_size, shuffle=False,
-                                        num_workers=4))
+# 下载Fashion-MINIST 数据
+mnist_train = torchvision.datasets.FashionMNIST(root='./Datasets/FashionMNIST', train=True,
+                                                download=True, transform=transforms.ToTensor())
+mnist_test = torchvision.datasets.FashionMNIST(root='./Datasets/FashionMNIST', train=False,
+                                               download=True, transform=transforms.ToTensor())
 
-
-train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size)
+# 读取数据
+train_iter = torch.utils.data.DataLoader(mnist_train, batch_size=batch_size, shuffle=True,
+                                         num_workers=0)
+test_iter = torch.utils.data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False,
+                                        num_workers=0)
 
 net = nn.Sequential(nn.Flatten(), nn.Linear(784, 10))
 
