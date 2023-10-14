@@ -8,13 +8,13 @@ std::map<std::string, int> semaphores;
 std::mutex mtx;
 std::condition_variable cv;
 
-// 初始化信号量
+// 鍒濆鍖栦俊鍙烽噺
 void initSemaphore(const std::string& identifier, int initialCount) {
     std::lock_guard<std::mutex> lock(mtx);
     semaphores[identifier] = initialCount;
 }
 
-// Swait原语
+// Swait鍘熻
 void Swait(const std::string& identifier, int threadId) {
     std::unique_lock<std::mutex> lock(mtx);
     
@@ -26,7 +26,7 @@ void Swait(const std::string& identifier, int threadId) {
     semaphores[identifier]--;
 }
 
-// Ssignal原语
+// Ssignal鍘熻
 void Ssignal(const std::string& identifier) {
     std::lock_guard<std::mutex> lock(mtx);
     semaphores[identifier]++;
@@ -35,22 +35,22 @@ void Ssignal(const std::string& identifier) {
 }
 
 int main() {
-    // 初始化信号量集合
+    // 鍒濆鍖栦俊鍙烽噺闆嗗悎
     initSemaphore("S1", 1);
     initSemaphore("S2", 2);
-    // 可以添加更多的信号量
+    // 鍙互娣诲姞鏇村鐨勪俊鍙烽噺
 
-    // 创建线程
+    // 鍒涘缓绾跨▼
     std::thread t1([&]() {
-        Swait("S1", 1); // 线程1等待S1
-        // 执行需要信号量S1的操作
-        Ssignal("S1"); // 释放信号量S1
+        Swait("S1", 1); // 绾跨▼1绛夊緟S1
+        // 鎵ц闇€瑕佷俊鍙烽噺S1鐨勬搷浣?
+        Ssignal("S1"); // 閲婃斁淇″彿閲廠1
     });
 
     std::thread t2([&]() {
-        Swait("S2", 2); // 线程2等待S2
-        // 执行需要信号量S2的操作
-        Ssignal("S2"); // 释放信号量S2
+        Swait("S2", 2); // 绾跨▼2绛夊緟S2
+        // 鎵ц闇€瑕佷俊鍙烽噺S2鐨勬搷浣?
+        Ssignal("S2"); // 閲婃斁淇″彿閲廠2
     });
 
     t1.join();
