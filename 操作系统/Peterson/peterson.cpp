@@ -41,7 +41,8 @@ void threadB()
 
 int main()
 {
-    thread t0(threadA) t1(threadB);
+    thread t0(threadA);
+    thread t1(threadB);
     t0.join();
     t1.join();
 
