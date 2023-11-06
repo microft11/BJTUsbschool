@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import CountVectorizer
-from scipy.sparse import hstack, csr_matrix
+from scipy.sparse import hstack, csr_matrix, issparse
+from scipy.sparse import vstack
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -152,7 +153,6 @@ print("end6")
 num_epochs = 10
 for epoch in range(num_epochs):
     optimizer.zero_grad()
-
     # # train_features = train_data['History_features'].apply(lambda x: csr_matrix(x))
     # train_features = train_data['History_features'].apply(lambda x: csr_matrix(np.array(x)))
     # # 合并稀疏矩阵成一个大的稀疏矩阵
@@ -160,26 +160,92 @@ for epoch in range(num_epochs):
     # # 将合并的稀疏矩阵转换为 PyTorch 张量
     # train_features_tensor = torch.tensor(merged_features.toarray(), dtype=torch.float32)
 
-    train_features = train_data['History_features'].apply(
-        lambda x: csr_matrix(np.array(x) if np.array(x).any() else None))
-    # 过滤掉空的 csr_matrix
-    train_features = train_features[train_features.apply(lambda x: x is not None)]
-    # 合并稀疏矩阵成一个大的稀疏矩阵
-    merged_features = hstack(train_features.tolist())
-    # 将合并的稀疏矩阵转换为 PyTorch 张量
-    train_features_tensor = torch.tensor(merged_features.toarray(), dtype=torch.float32)
+    # 定义一个函数来处理每个元素，将非零稀疏矩阵转化为 csr_matrix，其他情况保持不变
+    def process_sparse_matrix(x):
+        if issparse(x):
+            return x
+        else:
+            # 如果 x 是一个数组并且包含至少一个非零元素
+            if isinstance(x, np.ndarray) and np.count_nonzero(x) > 0:
+                return csr_matrix(x)
+            else:
+                return None  # 或者返回其他默认值
 
-    outputs = model(train_features)
-    loss = criterion(outputs, torch.tensor(train_labels, dtype=torch.float32))
+
+    # # Convert each sparse matrix element to a CSR matrix
+    # train_features = train_data['History_features'].apply(process_sparse_matrix)
+    # # Filter out None values
+    # train_features = train_features[train_features.apply(lambda x: x is not None)]
+    # # Convert train_features to a list of CSR matrices
+    # train_features_list = list(train_features)
+    # # Convert the list of CSR matrices to a 2-D numpy array
+    # train_features_array = np.vstack(train_features_list)
+    # # Use vstack to stack the sparse matrices
+    # merged_features = vstack(train_features_array)
+    # # Convert the merged sparse matrix to a PyTorch tensor
+    # train_features_tensor = torch.tensor(merged_features.toarray(), dtype=torch.float32)
+
+    # Convert each sparse matrix element to a CSR matrix
+    train_features = train_data['History_features'].apply(process_sparse_matrix)
+    # Filter out None values
+    train_features = train_features[train_features.apply(lambda x: x is not None)]
+
+    # Check if there are any valid CSR matrices in the list
+    if not train_features.empty:
+        # Convert train_features to a list of CSR matrices
+        train_features_list = list(train_features)
+        # Convert the list of CSR matrices to a 2-D numpy array
+        train_features_array = np.vstack(train_features_list)
+        # Use vstack to stack the sparse matrices
+        merged_features = vstack(train_features_array)
+        # Convert the merged sparse matrix to a PyTorch tensor
+        train_features_tensor = torch.tensor(merged_features.toarray(), dtype=torch.float32)
+    else:
+        # Handle the case where there are no valid CSR matrices
+        print("No valid CSR matrices found in train_features")
+
+    # outputs = model(train_features)
+    train_features = train_features.astype(np.float32)
+    print(train_features.values)
+    outputs = model(torch.tensor(train_features.values, dtype=torch.float32))
+    loss = criterion(outputs, torch.tensor(train_labels.values, dtype=torch.float32))
     loss.backward()
     optimizer.step()
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}')
 
+
 # 使用模型进行预测
 # 对测试数据进行相同的特征处理并转化为张量
-test_features = test_data['History_features']  # 假设这是测试数据特征
-test_features = torch.tensor(test_features, dtype=torch.float32)
-predictions = model(test_features)  # 进行CTR预测
+# 在测试数据上进行相同的特征处理并转化为PyTorch张量
+def process_sparse_matrix(x):
+    if issparse(x):
+        return x
+    else:
+        # 如果 x 是一个数组并且包含至少一个非零元素
+        if isinstance(x, np.ndarray) and np.count_nonzero(x) > 0:
+            return csr_matrix(x)
+        else:
+            return None  # 或者返回其他默认值
+
+
+test_features = test_data['History_features'].apply(process_sparse_matrix)  # 使用与训练数据相同的处理方法
+test_features = test_features[test_features.apply(lambda x: x is not None)]  # 过滤掉None值
+
+# 检查是否有有效的CSR矩阵
+if not test_features.empty:
+    # 将测试数据特征转化为PyTorch张量
+    test_features_list = list(test_features)
+    test_features_array = np.vstack(test_features_list)
+    test_features_tensor = torch.tensor(test_features_array, dtype=torch.float32)
+else:
+    print("No valid CSR matrices found in test_features")
+
+# 使用模型进行预测
+predictions = model(test_features_tensor)
+#
+# test_features = test_data['History_features']  # 假设这是测试数据特征
+# test_features = torch.tensor(test_features, dtype=torch.float32)
+# predictions = model(test_features)  # 进行CTR预测
 print("end7")
 
 # 假设predictions是模型对测试数据的预测结果
