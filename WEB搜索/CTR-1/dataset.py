@@ -2,19 +2,21 @@ import random
 import pandas as pd
 
 from torch.utils.data import Dataset, Subset
+from torch.utils.data import WeightedRandomSampler
 from tqdm import tqdm
 import torch
 
 
 class MindDataset(Dataset):
     def __init__(
-        self,
-        file_path,
-        news_dict,
-        vocab,
-        title_size,
-        max_his_size,
-        mode = 'train',
+            self,
+            file_path,
+            news_dict,
+            vocab,
+            title_size,
+            max_his_size,
+            mode='train',
+            pos_ratio=0.5,  # 根据需要调整这个比例
     ):
         self.file_path = file_path
         self.news_dict = news_dict
@@ -22,6 +24,7 @@ class MindDataset(Dataset):
         self.title_size = title_size
         self.max_his_size = max_his_size
         self.mode = mode
+        self.pos_ratio = pos_ratio
 
         self.samples = []
         self.impid2idx = {}
@@ -40,37 +43,51 @@ class MindDataset(Dataset):
         return len(self.impid2idx)
 
     def gene_samples(self):
-        """
-        Generate samples from impressions
-        """
         column_names = ['impid', 'uid', 'time', 'history', 'imps']
         raw_data = pd.read_csv(
-            self.file_path, sep='\t', 
-            header=None, 
+            self.file_path, sep='\t',
+            header=None,
             names=column_names,
         )
         raw_data['history'] = raw_data['history'].fillna('')
         idx = 0
+        samples = []  # 存储所有样本
+        positive_samples = []  # 存储正样本
+
         for _, row in tqdm(raw_data.iterrows()):
             history = row['history'].split()
             imps = row['imps'].split()
             idx_list = []
             for imp in imps:
-                # Hint 4: Class Imbalance. Too many negative samples!
                 if self.mode == 'train':
                     imp = imp.split('-')
-                    self.samples.append({
-                        'impid': row['impid'], 'history': history, 
-                        'imp': imp[0], 'label': imp[1]
-                    })
+                    sample = {
+                        'impid': row['impid'],
+                        'history': history,
+                        'imp': imp[0],
+                        'label': imp[1]
+                    }
+                    if imp[1] == '1':
+                        positive_samples.append(sample)  # 将正样本添加到正样本列表
                 elif self.mode == 'test':
-                    self.samples.append({
-                        'impid': row['impid'], 'history': history, 
+                    sample = {
+                        'impid': row['impid'],
+                        'history': history,
                         'imp': imp
-                    })
+                    }
+                samples.append(sample)
                 idx_list.append(idx)
                 idx += 1
             self.impid2idx[row['impid']] = idx_list
+
+        num_samples = len(samples)
+        num_positive_samples = len(positive_samples)  # 计算正样本的数量
+        num_negative_samples = num_samples - num_positive_samples  # 计算负样本的数量
+
+        if num_negative_samples < num_samples:
+            samples = random.sample(samples, num_samples)  # 随机采样负样本，使其数量等于总样本数量
+
+        self.samples = samples
 
     def train_val_split(self, val_imps_len):
         """ 

@@ -4,12 +4,12 @@ from torch import nn
 
 class NewsEncoder(nn.Module):
     def __init__(
-        self, 
-        vector_dim, 
-        news_dim, 
-        window_size, 
-        vocab, 
-        word_vectors = None,
+            self,
+            vector_dim,
+            news_dim,
+            window_size,
+            vocab,
+            word_vectors=None,
     ):
         super(NewsEncoder, self).__init__()
         self.vocab = vocab
@@ -36,7 +36,7 @@ class NewsEncoder(nn.Module):
             nn.ReLU(),
             nn.AdaptiveMaxPool1d(output_size=1),
         )
-        
+
         if word_vectors is not None:
             self.init_embed()
 
@@ -68,12 +68,13 @@ class UserEncoder(nn.Module):
 
 class NewsRecBaseModel(nn.Module):
     def __init__(
-        self,
-        vector_dim,
-        news_dim,
-        window_size,
-        vocab,
-        word_vectors = None,
+            self,
+            vector_dim,
+            news_dim,
+            window_size,
+            vocab,
+            word_vectors=None,
+            pos_weight=None,  # Add pos_weight parameter for class imbalance
     ):
         super(NewsRecBaseModel, self).__init__()
         self.news_encoder = NewsEncoder(
@@ -85,15 +86,15 @@ class NewsRecBaseModel(nn.Module):
         )
         self.user_encoder = UserEncoder(news_dim)
 
-        self.loss_fn = nn.BCEWithLogitsLoss()
+        self.loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)  # Pass pos_weight to BCEWithLogitsLoss
 
-    def forward(self, batch_history, batch_imp, batch_label = None):
+    def forward(self, batch_history, batch_imp, batch_label=None):
         user_vecs = []
         for history in batch_history:
             history_vecs = self.news_encoder(history)
             user_vecs.append(self.user_encoder(history_vecs))
 
-        user_vecs = torch.cat(user_vecs, dim=0)        
+        user_vecs = torch.cat(user_vecs, dim=0)
         news_vecs = self.news_encoder(batch_imp)
         score = torch.mul(user_vecs, news_vecs).sum(dim=1)
 
@@ -101,4 +102,4 @@ class NewsRecBaseModel(nn.Module):
             return score
         
         loss = self.loss_fn(score, batch_label.float())
-        return loss, score
+        return loss

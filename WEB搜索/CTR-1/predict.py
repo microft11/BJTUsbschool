@@ -20,12 +20,12 @@ def predict(args, model, test_loader):
     model.eval()
     test_loader = tqdm(test_loader, ncols=args.ncols)
 
-    impid_list, score_list = [], []
+    impid_list, score_list = []
 
     for step, (
-        batch_impid, 
-        batch_history, 
-        batch_imp, 
+            batch_impid,
+            batch_history,
+            batch_imp,
     ) in enumerate(test_loader):
         batch_impid = batch_impid.to(args.device)
         batch_history = [
@@ -46,12 +46,12 @@ def predict(args, model, test_loader):
             impres[impid] = {}
             impres[impid]['score'] = []
         impres[impid]['score'].append(score)
-    
+
     preds = []
     for impid in sorted(impres.keys()):
         pred = np.argsort(np.argsort(impres[impid]['score'])) + 1
         preds.append(pred)
-    
+
     return preds
 
 

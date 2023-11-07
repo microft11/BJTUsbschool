@@ -1,3 +1,4 @@
+import functools
 import os
 import pprint
 import torch
@@ -5,9 +6,11 @@ import torch
 os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 from datetime import datetime
-from torch.optim import Adam 
+from torch.optim import Adam
+from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from arguments import get_args
 from dataset import MindDataset
@@ -22,10 +25,10 @@ def train(args, model, optimizer, train_loader):
 
     logloss = 0.
     for step, (
-        batch_impid,
-        batch_history,
-        batch_imp,
-        batch_label,
+            batch_impid,
+            batch_history,
+            batch_imp,
+            batch_label,
     ) in enumerate(train_loader):
         batch_impid = batch_impid.to(args.device)
         batch_history = [
@@ -34,9 +37,8 @@ def train(args, model, optimizer, train_loader):
         batch_imp = batch_imp.to(args.device)
         batch_label = batch_label.to(args.device)
 
-        batch_loss, batch_score = model(
-            batch_history, batch_imp, batch_label
-        )
+        # 在这里调用模型的forward方法，并传递mode参数
+        batch_loss = model(batch_history, batch_imp, batch_label)
 
         batch_loss.backward()
         optimizer.step()
@@ -57,23 +59,23 @@ def eval(args, model, val_loader):
     impid_list, label_list, score_list = [], [], []
 
     for step, (
-        batch_impid, 
-        batch_history, 
-        batch_imp, 
-        batch_label,
+            batch_impid,
+            batch_history,
+            batch_imp,
+            batch_label,
     ) in enumerate(val_loader):
-        batch_impid = batch_impid.to(args.device)
+        batch_impid = batch_impid
+        to(args.device)
         batch_history = [
             history.to(args.device) for history in batch_history
         ]
         batch_imp = batch_imp.to(args.device)
         batch_label = batch_label.to(args.device)
 
-        batch_loss, batch_score = model(
-            batch_history, batch_imp, batch_label
-        )
+        # 在这里调用模型的forward方法，并传递mode参数
+        batch_loss, batch_score = model(batch_history, batch_imp, batch_label, mode='eval')
 
-        logloss += batch_loss.item()
+        logloss += batch_loss
         impid_list.extend(batch_impid.tolist())
         label_list.extend(batch_label.tolist())
         score_list.extend(batch_score.tolist())
@@ -115,11 +117,11 @@ def main():
     args = get_args()
     green_print('### arguments:')
     pprint.pprint(args.__dict__, width=1)
-    init_seed(args.seed)        
+    init_seed(args.seed)
 
     green_print('### 1. Build vocabulary and load pre-trained vectors')
     news_dict, vocab = read_news(
-        file_path=os.path.join(args.data_path, 'news.txt'), 
+        file_path=os.path.join(args.data_path, 'news.txt'),
         filter_num=args.filter_num,
     )
 
@@ -150,16 +152,16 @@ def main():
         f'# train impressions: {train_imps_len:>6} | {1 - args.val_ratio:6.2%}\n' \
         f'# valid impressions: {val_imps_len:>6} | {args.val_ratio:6.2%}' \
     )
-    
+
     train_dataset, val_dataset = mind_dataset.train_val_split(val_imps_len)
 
     train_kwargs = {
-        'batch_size': args.train_batch_size, 
-        'shuffle': True, 
+        'batch_size': args.train_batch_size,
+        'shuffle': True,
         'collate_fn': mind_dataset.collate_fn
     }
     val_kwargs = {
-        'batch_size': args.infer_batch_size, 
+        'batch_size': args.infer_batch_size,
         'shuffle': False,
         'collate_fn': mind_dataset.collate_fn
     }
@@ -176,10 +178,13 @@ def main():
     )
     model.to(args.device)
     optimizer = Adam(model.parameters(), lr=args.learning_rate)
+    # 在定义优化器时使用AdamW
+    # optimizer = AdamW(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     print('done.')
 
     green_print('### 4. Start training')
     print(f'time: {datetime.now()}')
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
     for epoch in range(args.epochs):
         print('-' * 88)
         print(f'epoch: {epoch}')
@@ -190,6 +195,7 @@ def main():
             f'valid info || logloss: {val_logloss:.4f} | auc: {auc:.4f} ' \
             f'| mrr: {mrr:.4f} | ndcg@5: {ndcg5:.4f} | ndcg@10: {ndcg10:.4f}' \
         )
+        scheduler.step(val_logloss)  # 根据验证集的性能进行学习率调整
 
     green_print('### 5. Save model')
     if not os.path.exists(args.ckpt_path):
