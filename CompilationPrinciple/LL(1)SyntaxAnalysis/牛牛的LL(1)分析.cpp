@@ -1,7 +1,12 @@
-#include <iostream>
-#include <string>
-#include <iomanip>
+#include<iostream>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <map>
+#include <set>
+#include <iomanip>
+#include <stack>
+#include <vector>
 using namespace std;
 
 string s, Be;
