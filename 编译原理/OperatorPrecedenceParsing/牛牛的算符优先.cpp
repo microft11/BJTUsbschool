@@ -85,37 +85,39 @@ int main()
 	string Be="";int One=0;
 	while (cin>>s)
 	{
+		// 读取文法规则
 		int position=s.find("->");
-		for (int i=0; i<s.length(); ++i)
-		if ((s[i]=='-' && s[i+1]=='>') || s[i]=='>' || s[i]=='|') continue;
-		else 
-		{
-			string S="";S+=s[i];
-			if (s[i]>='A' && s[i]<='Z') 
+		for (int i=0; i<s.length(); ++i)  // 处理文法符号和终结符
+			if ((s[i]=='-' && s[i+1]=='>') || s[i]=='>' || s[i]=='|') continue;
+			else 
 			{
-				if (s[i+1]=='\'') S+=s[++i];
-				Vn.insert(S);
+				string S="";S+=s[i];
+				if (s[i]>='A' && s[i]<='Z') 
+				{
+					if (s[i+1]=='\'') S+=s[++i];
+					Vn.insert(S);
+				}
+				else if (S!="^") Vt.insert(S);
 			}
-			else if (S!="^") Vt.insert(S);
-		}
-		string S1=s.substr(0,position),S2=s.substr(position+2,s.length());
-		if (!One) Be=S1,One=1;
-		string res="";
-		for (int i=0; i<S2.length(); ++i)
-		if (S2[i]=='|')
-		{
-			Chan[S1].insert(res);
-			res="";
-		}else res+=S2[i];
+		string S1 = s.substr(0, position), S2 = s.substr(position+2, s.length());
+		if (!One) Be=S1, One=1;
+		string res = "";
+		for (int i=0; i < S2.length(); ++i)
+			if (S2[i] == '|') // 处理产生式
+			{
+				Chan[S1].insert(res);
+				res = "";
+			}else res += S2[i];
 		Chan[S1].insert(res);
 	}
+
 	Vt.insert("#");
 	printf("非终结符号集合如下\n");
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++) 
-	cout<<*it<<' ',num_Vn[*it]=++Vn_num/*,num_to_Vn[Vn_num]=*it*/;cout<<endl;
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++) 
+		cout<< *it <<' ', num_Vn[*it] = ++ Vn_num/*,num_to_Vn[Vn_num]=*it*/; cout << endl;
 	printf("终结符号集合如下：\n"); 
-	for (set<string>::iterator it=Vt.begin(); it!=Vt.end(); it++) 
-	cout<<*it<<' ',num_Vt[*it]=++Vt_num/*,num_to_Vt[Vt_num]=*it*/;cout<<endl;
+	for (set<string>::iterator it = Vt.begin(); it != Vt.end(); it ++) 
+		cout<< *it <<' ', num_Vt[*it] = ++ Vt_num/*,num_to_Vt[Vt_num]=*it*/; cout << endl;
 	
 	//构建firstVT集
 	stack<string> StackVn, StackVt;
@@ -124,118 +126,142 @@ int main()
 		string S1=*it;	
 		for (set<string>::iterator it2=Chan[S1].begin(); it2!=Chan[S1].end(); it2++)
 		{
-			string S2=*it2,Xi="",Xii="";int now=0;
-			Xi+=S2[0];if (S2[now+1]=='\'') Xi+=S2[++now];
+			string S2 = *it2, Xi = "", Xii = ""; 
+			int now = 0;
+			Xi += S2[0];
+			if (S2[now+1] == '\'') Xi += S2[++now];
 			From_first[Xi].insert(S1);
-			if (now+1<S2.length()) {Xii+=S2[++now];if (S2[now+1]=='\'') Xii+=S2[++now];}
-			if (Vt.find(Xi)!=Vt.end()) 
+			if (now+1<S2.length()) 
+			{
+				Xii += S2[++now];
+				if (S2[now+1] == '\'') Xii += S2[++ now];
+			}
+			if (Vt.find(Xi)!= Vt.end()) 
 			{
 				FirstVt[S1].insert(Xi);
-				if (Find_FirstVt[num_Vn[S1]][num_Vt[Xi]]==0)
-				Find_FirstVt[num_Vn[S1]][num_Vt[Xi]]=1,StackVn.push(S1),StackVt.push(Xi);
+				if (Find_FirstVt[num_Vn[S1]][num_Vt[Xi]] == 0)
+				Find_FirstVt[num_Vn[S1]][num_Vt[Xi]] = 1, StackVn.push(S1), StackVt.push(Xi);
 			}
-			else if (Vn.find(Xi)!=Vn.end() && Vt.find(Xii)!=Vt.end()) 
+			else if (Vn.find(Xi) != Vn.end() && Vt.find(Xii) != Vt.end()) 
 			{
 				FirstVt[S1].insert(Xii);
-				if (Find_FirstVt[num_Vn[S1]][num_Vt[Xii]]==0)
-				Find_FirstVt[num_Vn[S1]][num_Vt[Xii]]=1,StackVn.push(S1),StackVt.push(Xii);
+				if (Find_FirstVt[num_Vn[S1]][num_Vt[Xii]] == 0)
+				Find_FirstVt[num_Vn[S1]][num_Vt[Xii]]=1, StackVn.push(S1), StackVt.push(Xii);
 			}
 		}
 	} 
 	while (!StackVn.empty())
 	{
-		string V=StackVn.top(),b=StackVt.top();StackVn.pop();StackVt.pop();
-		for (set<string>::iterator it=From_first[V].begin(); it!=From_first[V].end(); it++)
+		string V=StackVn.top(), b=StackVt.top();
+		StackVn.pop(); StackVt.pop();
+		for (set<string>::iterator it = From_first[V].begin(); it != From_first[V].end(); it++)
 		{
-			string U=*it;
+			string U = *it;
 			if (!Find_FirstVt[num_Vn[U]][num_Vt[b]]) 
 			{
-				Find_FirstVt[num_Vn[U]][num_Vt[b]]=1;
-				StackVn.push(U);StackVt.push(b);
+				Find_FirstVt[num_Vn[U]][num_Vt[b]] = 1;
+				StackVn.push(U);
+				StackVt.push(b);
 			}
 		}
 	}
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;
-		for (set<string>::iterator it2=Vt.begin(); it2!=Vt.end(); it2++)
+		string S1 = *it;
+		for (set<string>::iterator it2 = Vt.begin(); it2 != Vt.end(); it2 ++)
 		{
-			string S2=*it2;
-			if (Find_FirstVt[num_Vn[S1]][num_Vt[S2]]) FirstVt[S1].insert(S2);
+			string S2 = *it2;
+			if (Find_FirstVt[num_Vn[S1]][num_Vt[S2]])
+				FirstVt[S1].insert(S2);
 		}
 	}
 	printf("各非终结符FirstVt集如下：\n"); 
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;cout<<*it<<":"<<' ';
-		for (set<string>::iterator it2=FirstVt[S1].begin(); it2!=FirstVt[S1].end(); it2++)
+		string S1 = *it;
+		cout << *it << ":" << ' ';
+		for (set<string>::iterator it2 = FirstVt[S1].begin(); it2 != FirstVt[S1].end(); it2 ++)
 		{
-			cout<<*it2<<' ';
-		}cout<<endl;
+			cout << *it2 << ' ';
+		}
+		cout << endl;
 	} 
 	
 	
 	//构造lastVt集合
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;	
-		for (set<string>::iterator it2=Chan[S1].begin(); it2!=Chan[S1].end(); it2++)
+		string S1 = *it;	
+		for (set<string>::iterator it2 = Chan[S1].begin(); it2 != Chan[S1].end(); it2++)
 		{
-			string S2=*it2,Xi="",Xii="";int now=S2.length()-1;
-			if (S2[now]=='\'') Xii+=S2[--now],Xii+=S2[now+1];else Xii+=S2[now];
+			string S2 = *it2, Xi = "", Xii = "";
+			int now = S2.length() - 1;
+			if (S2[now]=='\'') Xii += S2[--now], Xii += S2[now+1];
+			else Xii += S2[now];
 			From_last[Xii].insert(S1);
-			if (now) {now--;if (S2[now]=='\'') Xi+=S2[now-1],Xi+=S2[now];else Xi+=S2[now];}
-			if (Vt.find(Xii)!=Vt.end())
+			if (now) 
+			{
+				now --;
+				if (S2[now] == '\'') Xi += S2[now-1], Xi += S2[now];
+				else Xi += S2[now];
+			}
+			if (Vt.find(Xii) != Vt.end())
 			{
 				LastVt[S1].insert(Xii);
 				if (!Find_LastVt[num_Vn[S1]][num_Vt[Xii]])
-				Find_LastVt[num_Vn[S1]][num_Vt[Xii]]=1,StackVn.push(S1),StackVt.push(Xii);
+				Find_LastVt[num_Vn[S1]][num_Vt[Xii]] = 1, StackVn.push(S1), StackVt.push(Xii);
 			}
-			else if (Vt.find(Xi)!=Vt.end() && Vn.find(Xii)!=Vn.end())
+			else if (Vt.find(Xi) != Vt.end() && Vn.find(Xii) != Vn.end())
 			{
 				LastVt[S1].insert(Xi);
 				if (!Find_LastVt[num_Vn[S1]][num_Vt[Xi]])
-				Find_LastVt[num_Vn[S1]][num_Vt[Xi]]=1,StackVn.push(S1),StackVt.push(Xi);
+				Find_LastVt[num_Vn[S1]][num_Vt[Xi]]=1, StackVn.push(S1), StackVt.push(Xi);
 			}
 		}
 	} 
 	while (!StackVn.empty())
 	{
-		string V=StackVn.top(),b=StackVt.top();StackVn.pop();StackVt.pop();
-		for (set<string>::iterator it=From_last[V].begin(); it!=From_last[V].end(); it++)
+		string V = StackVn.top(), b = StackVt.top();
+		StackVn.pop(); StackVt.pop();
+		for (set<string>::iterator it = From_last[V].begin(); it != From_last[V].end(); it ++)
 		{
-			string U=*it;
+			string U = *it;
 			if (!Find_LastVt[num_Vn[U]][num_Vt[b]]) 
 			{
-				Find_LastVt[num_Vn[U]][num_Vt[b]]=1;
-				StackVn.push(U);StackVt.push(b);
+				Find_LastVt[num_Vn[U]][num_Vt[b]] = 1;
+				StackVn.push(U);
+				StackVt.push(b);
 			}
 		}
 	}
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;
-		for (set<string>::iterator it2=Vt.begin(); it2!=Vt.end(); it2++)
+		string S1 = *it;
+		for (set<string>::iterator it2 = Vt.begin(); it2 != Vt.end(); it2 ++)
 		{
-			string S2=*it2;
-			if (Find_LastVt[num_Vn[S1]][num_Vt[S2]]) LastVt[S1].insert(S2);
+			string S2 = *it2;
+			if (Find_LastVt[num_Vn[S1]][num_Vt[S2]]) 
+				LastVt[S1].insert(S2);
 		}
 	}
+
 	printf("各非终结符LastVt集如下：\n"); 
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;cout<<*it<<":"<<' ';
-		for (set<string>::iterator it2=LastVt[S1].begin(); it2!=LastVt[S1].end(); it2++)
+		string S1 = *it;
+		cout << *it << ":" << ' ';
+		for (set<string>::iterator it2 = LastVt[S1].begin(); it2 != LastVt[S1].end(); it2++)
 		{
-			cout<<*it2<<' ';
-		}cout<<endl;
+			cout << *it2 << ' ';
+		}
+		cout << endl;
 	} 
 	
 	//制作算符优先分析表 
-	tab[num_Vt["#"]][num_Vt["#"]]="=";
-	for (set<string>::iterator it=Vn.begin(); it!=Vn.end(); it++)
+	tab[num_Vt["#"]][num_Vt["#"]] = "=";
+	for (set<string>::iterator it = Vn.begin(); it != Vn.end(); it ++)
 	{
-		string S1=*it;	
+		string S1 = *it;	
 		for (set<string>::iterator it2=Chan[S1].begin(); it2!=Chan[S1].end(); it2++)
 		{
 			string S2=*it2;
@@ -288,28 +314,31 @@ int main()
     }
     
     //准备进行匹配
-	freopen("4_4.out","r",stdin);
+	freopen("4_4.out", "r", stdin);
 	char s[505];
-	while (scanf("%s",s)!=EOF)
+	while (scanf("%s",s) != EOF)
 	{
-		int len=strlen(s),L=0,mid,R;s[len]='(';	
-		string shizi="",shizi_zhen="";
-		for (int i=0; i<len; ++i)
+		// 处理输入的表达式
+		int len = strlen(s), L = 0, mid, R; 
+		s[len] = '(';	
+		string shizi = "", shizi_zhen = "";
+		for (int i=0; i < len; ++ i)
 		{
-			if (s[i]==',') mid=i;
-			if (s[i]==')' && s[i+1]=='(') {R=i;break;}
+			if (s[i] == ',') mid = i;
+			if (s[i] == ')' && s[i + 1] == '(') {R = i; break;}
 		}
-		while (L<len)
+		while (L < len)
 		{
-			if (mid==L+2 && s[L+1]=='1') shizi_zhen+='i';
-			else  for (int i=mid+1; i<R; ++i) shizi_zhen+=s[i];
+			if (mid == L + 2 && s[L + 1] == '1') shizi_zhen += 'i';
+			else  for (int i = mid + 1; i < R; ++ i) shizi_zhen += s[i];
 			for (int i=mid+1; i<R; ++i) shizi+=s[i];
-			L=R+1;mid=L+1;R=mid+1;if (L==len) break;
+			L=R+1; mid=L+1; R=mid+1; if (L==len) break;
 			while (s[mid]!=',') mid++;
 			while (s[R]!=')' || s[R]==')' && s[R+1]!='(') R++;	
 		}
-		cout<<"原来表达式："<<shizi<<endl<<"抽象为："<<shizi_zhen<<endl;
-		shizi_zhen+='#';Do_it(shizi_zhen);
+		cout << "原来表达式："<< shizi << endl << "抽象为："<< shizi_zhen << endl;
+		shizi_zhen += '#';
+		Do_it(shizi_zhen);
 	} 
 }
 
