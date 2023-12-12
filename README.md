@@ -1,2 +1,2 @@
-# BJTUsbschool计科专业课代码
+## BJTUsbschool计科专业课代码
 
