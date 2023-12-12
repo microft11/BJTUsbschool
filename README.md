@@ -1,3 +1,2 @@
-# BJTUsbschool
+# BJTUsbschool计科专业课代码
 
-存储学校里的代码
