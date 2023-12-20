@@ -125,6 +125,7 @@ transform = transforms.Compose(
 cifar_train = torchvision.datasets.CIFAR10(root=data_dir, train=True, download=True, transform=transform)
 cifar_test = torchvision.datasets.CIFAR10(root=data_dir, train=False, download=True, transform=transform)
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
 num_classes = 10
 epochs = 5
 lr = 0.001
