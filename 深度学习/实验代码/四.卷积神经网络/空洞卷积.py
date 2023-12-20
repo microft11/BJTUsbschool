@@ -131,14 +131,15 @@ epochs = 5
 lr = 0.001
 batch_size = 512
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-cifar_trainloader = torch.utils.data.DataLoader(
-    cifar_train, batch_size=batch_size, shuffle=True, num_workers=0
-)
-cifar_testloader = torch.utils.data.DataLoader(
-    cifar_test, batch_size=batch_size, shuffle=True, num_workers=0
-)
-net = DilatedConvModule().to(device)
 
+# cifar_trainloader = torch.utils.data.DataLoader(
+#     cifar_train, batch_size=batch_size, shuffle=True, num_workers=0
+# )
+# cifar_testloader = torch.utils.data.DataLoader(
+#     cifar_test, batch_size=batch_size, shuffle=True, num_workers=0
+# )
+
+net = DilatedConvModule().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=lr)
 
