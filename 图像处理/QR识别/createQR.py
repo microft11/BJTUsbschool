@@ -9,7 +9,7 @@ qr = qrcode.QRCode(
     version=5, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=8, border=4)
 
 # 添加数据
-qr.add_data("bjtu ls 21281165, cwx 212512544, zzh ")
+qr.add_data("bjtu ls 21281165, cwx 212512544, zzh 21281180")
 qr.make(fit=True)
 
 # 生成二维码图像
@@ -17,7 +17,7 @@ img = qr.make_image()
 img = img.convert("RGBA")
 
 # 显示图片，可以通过save保存
-img.save("myQR.png")
+img.save("image/myQR.png")
 img.show()
 
 
