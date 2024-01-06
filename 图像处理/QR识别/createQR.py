@@ -9,7 +9,7 @@ qr = qrcode.QRCode(
     version=5, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=8, border=4)
 
 # 添加数据
-qr.add_data("组内成员：龙硕 21281165 \n 曹文轩 212512544 \n 赵子皓 ")
+qr.add_data("bjtu ls 21281165, cwx 212512544, zzh ")
 qr.make(fit=True)
 
 # 生成二维码图像
