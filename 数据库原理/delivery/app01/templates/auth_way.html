@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理界面</title>
+</head>
+
+<body>
+
+<h1>用户查询</h1>
+<a href="http://127.0.0.1:8000/user/info/">查询</a>
+
+<h1>菜品添加</h1>
+<form method="post" action="/auth/add/">
+
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="菜名">
+    <input type="text" name="price" placeholder="价格">
+    <input type="text" name="marketer" placeholder="商家">
+    <input type="submit" value="提交">
+</form>
+
+<h1> </h1>
+<div> </div>
+<a href="http://127.0.0.1:8000/menu/info/">返回主菜单</a>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+</head>
+<body>
+<h1>用户列表</h1>
+
+<a href="/user/add/">添加</a>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>密码</th>
+            <th>电话</th>
+            <th>地址</th>
+        </tr>
+    </head>
+    <tbody>
+    {% for obj in data_list %}
+        <tr>
+            <td>{{ obj.id }}</td>
+            <td>{{ obj.name }}</td>
+            <td>{{ obj.password }}</td>
+            <td>{{ obj.phone }}</td>
+            <td>{{ obj.address }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div></div>
+<a href="/auth/">返回</a>
+</body>
+</html>

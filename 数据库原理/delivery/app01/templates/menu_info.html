@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单</title>
+</head>
+<body>
+<h1>点菜菜单</h1>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>菜名</th>
+            <th>价格</th>
+        </tr>
+    </head>
+    <tbody>
+    {% for obj in data_list %}
+        <tr>
+            <td>{{ obj.id }}</td>
+            <td>{{ obj.name }}</td>
+            <td>{{ obj.price }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h1> 菜品查询 </h1>
+<form method="post" action="/menu/info/find/">
+
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="香精煎鱼">
+    <input type="submit" value="提交">
+</form>
+
+<h2> 管理员模式 </h2>
+<a href="http://127.0.0.1:8000/auth">切换模式</a>
+</body>
+</html>
