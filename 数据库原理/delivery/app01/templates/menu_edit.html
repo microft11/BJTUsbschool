@@ -1,0 +1,19 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑菜品信息</title>
+</head>
+<body>
+<h1>编辑菜品信息</h1>
+<form method="post" action="/menu/edit/{{ menu.id }}/">
+    {% csrf_token %}
+    <input type="text" name="name" value="{{ menu.name }}" placeholder="菜名">
+    <input type="text" name="price" value="{{ menu.price }}" placeholder="价格">
+    <input type="text" name="marketer" value="{{ menu.marketer }}" placeholder="商家">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>

@@ -22,13 +22,19 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
 
     # ww.com/index -> 后面的函数
-    path('index/', views.index),
 
-    path('login/', views.login),
+
     path('user/info/', views.user_info_list),
     path('user/add/', views.user_add),
-    path('menu/info/', views.menu_info),
+    path('user/edit/<int:user_id>/', views.user_edit),
+    path('user/delete/<int:user_id>/', views.user_delete),
     path('menu/info/find/', views.menu_find),
+    path('menu/info/', views.menu_info),
+    path('menu/add/', views.auth_add),
+    path('menu/edit/<int:menu_id>/', views.menu_edit),
+    path('menu/delete/<int:menu_id>/', views.menu_delete),
     path('auth/', views.auth_way),
     path('auth/add/', views.auth_add),
+    path('login/', views.login),
+    path('', views.index),
 ]

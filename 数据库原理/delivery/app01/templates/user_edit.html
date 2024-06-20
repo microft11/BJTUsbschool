@@ -1,0 +1,20 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑用户信息</title>
+</head>
+<body>
+<h1>编辑用户信息</h1>
+<form method="post" action="/user/edit/{{ user.id }}/">
+    {% csrf_token %}
+    <input type="text" name="user" value="{{ user.name }}" placeholder="用户名">
+    <input type="text" name="password" value="{{ user.password }}" placeholder="密码">
+    <input type="text" name="phone" value="{{ user.phone }}" placeholder="电话">
+    <input type="text" name="address" value="{{ user.address }}" placeholder="地址">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>

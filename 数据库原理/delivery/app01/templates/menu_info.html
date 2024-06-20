@@ -14,6 +14,7 @@
             <th>ID</th>
             <th>菜名</th>
             <th>价格</th>
+            {% comment %} <th>操作</th> {% endcomment %}
         </tr>
     </head>
     <tbody>
@@ -22,6 +23,10 @@
             <td>{{ obj.id }}</td>
             <td>{{ obj.name }}</td>
             <td>{{ obj.price }}</td>
+            {% comment %} <td>
+                <a href="/menu/edit/{{ menu.id }}/">编辑</a>
+                <a href="/menu/delete/{{ menu.id }}/">删除</a>
+            </td> {% endcomment %}
         </tr>
     {% endfor %}
     </tbody>

@@ -3,6 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% comment %} <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/css/bootstrap.min.css"> {% endcomment %}
+    <!-- bootstrap -->
     <meta charset="UTF-8">
     <title>用户列表</title>
 </head>
@@ -19,6 +21,7 @@
             <th>密码</th>
             <th>电话</th>
             <th>地址</th>
+            <th>操作</th>
         </tr>
     </head>
     <tbody>
@@ -29,6 +32,10 @@
             <td>{{ obj.password }}</td>
             <td>{{ obj.phone }}</td>
             <td>{{ obj.address }}</td>
+            <td>
+                <a href="/user/edit/{{ user.id }}/">编辑</a>
+                <a href="/user/delete/{{ user.id }}/">删除</a>
+            </td>
         </tr>
     {% endfor %}
     </tbody>
