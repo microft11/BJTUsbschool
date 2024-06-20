@@ -8,32 +8,33 @@
 </head>
 <body>
 <h1>点菜菜单</h1>
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>菜名</th>
-            <th>价格</th>
-            {% comment %} <th>操作</th> {% endcomment %}
-        </tr>
-    </head>
-    <tbody>
-    {% for obj in data_list %}
-        <tr>
-            <td>{{ obj.id }}</td>
-            <td>{{ obj.name }}</td>
-            <td>{{ obj.price }}</td>
-            {% comment %} <td>
-                <a href="/menu/edit/{{ menu.id }}/">编辑</a>
-                <a href="/menu/delete/{{ menu.id }}/">删除</a>
-            </td> {% endcomment %}
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<form method="post" action="/menu/checkout/">
+    {% csrf_token %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>选择</th>
+                <th>ID</th>
+                <th>菜名</th>
+                <th>价格</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for obj in data_list %}
+            <tr>
+                <td><input type="checkbox" name="selected_dishes" value="{{ obj.id }}"></td>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.name }}</td>
+                <td>{{ obj.price }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="结算">
+</form>
+
 <h1> 菜品查询 </h1>
 <form method="post" action="/menu/info/find/">
-
     {% csrf_token %}
     <input type="text" name="name" placeholder="香精煎鱼">
     <input type="submit" value="提交">

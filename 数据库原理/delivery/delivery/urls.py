@@ -33,6 +33,8 @@ urlpatterns = [
     path('menu/add/', views.auth_add),
     path('menu/edit/<int:menu_id>/', views.menu_edit),
     path('menu/delete/<int:menu_id>/', views.menu_delete),
+    # path('menu/add/', views.menu_add),
+    path('menu/checkout/', views.menu_checkout),
     path('auth/', views.auth_way),
     path('auth/add/', views.auth_add),
     path('login/', views.login),

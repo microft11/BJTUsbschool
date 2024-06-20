@@ -120,3 +120,22 @@ def menu_delete(request, menu_id):
     menu = get_object_or_404(MenuInfo, id=menu_id)
     menu.delete()
     return redirect("http://127.0.0.1:8000/menu/info")
+
+def menu_checkout(request):
+    if request.method == "POST":
+        selected_dishes_ids = request.POST.getlist('selected_dishes')
+        print(f"Selected dish IDs: {selected_dishes_ids}")  # 调试输出
+        selected_dishes = MenuInfo.objects.filter(id__in=selected_dishes_ids)
+        
+        # 输出每个选中菜品的价格类型和内容
+        for dish in selected_dishes:
+            print(f"Dish: {dish.name}, Price: {dish.price}, Type of Price: {type(dish.price)}")
+        
+        total_price = sum(float(dish.price) for dish in selected_dishes)  # 确保价格字段转换为浮点数
+        
+        return render(request, "checkout.html", {
+            "selected_dishes": selected_dishes,
+            "total_price": total_price,
+        })
+    else:
+        return redirect("menu_info")
