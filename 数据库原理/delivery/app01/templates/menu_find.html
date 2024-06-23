@@ -1,31 +1,63 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% comment %} <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/css/bootstrap.min.css"> {% endcomment %}
-    <!-- bootstrap -->
     <meta charset="UTF-8">
     <title>菜品查询</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .link-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<h1>菜品信息</h1>
-<table border="1">
-    <thead>
-        <tr>
-            <th>菜名</th>
-            <th>价格</th>
-        </tr>
-    </head>
-    <tbody>
-        <tr>
-            <td>{{ name }}</td>
-            <td>{{ price }}</td>
-        </tr>
-    </tbody>
-</table>
-<hr>
-<a href="http://127.0.0.1:8000/menu/info/">返回菜单</a>"
-
+    <div class="container">
+        <h1>菜品信息</h1>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>菜名</th>
+                    <th>价格</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <div class="link-container">
+            <a href="http://127.0.0.1:8000/menu/info/" class="btn btn-default">返回菜单</a>
+        </div>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,46 +1,113 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>菜单</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .link-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link-container a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .link-container a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h1>点菜菜单</h1>
-<form method="post" action="/menu/checkout/">
-    {% csrf_token %}
-    <table border="1">
-        <thead>
-            <tr>
-                <th>选择</th>
-                <th>ID</th>
-                <th>菜名</th>
-                <th>价格</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for obj in data_list %}
-            <tr>
-                <td><input type="checkbox" name="selected_dishes" value="{{ obj.id }}"></td>
-                <td>{{ obj.id }}</td>
-                <td>{{ obj.name }}</td>
-                <td>{{ obj.price }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <input type="submit" value="结算">
-</form>
+    <div class="container">
+        <h1>点菜菜单</h1>
+        <form method="post" action="/menu/checkout/">
+            {% csrf_token %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>选择</th>
+                        <th>ID</th>
+                        <th>菜名</th>
+                        <th>价格</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for obj in data_list %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_dishes" value="{{ obj.id }}"></td>
+                        <td>{{ obj.id }}</td>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.price }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" value="结算">
+        </form>
 
-<h1> 菜品查询 </h1>
-<form method="post" action="/menu/info/find/">
-    {% csrf_token %}
-    <input type="text" name="name" placeholder="香精煎鱼">
-    <input type="submit" value="提交">
-</form>
+        <h1>菜品查询</h1>
+        <form method="post" action="/menu/info/find/">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="香精煎鱼">
+            <input type="submit" value="提交">
+        </form>
 
-<h2> 管理员模式 </h2>
-<a href="http://127.0.0.1:8000/auth">切换模式</a>
+        <h2>管理员模式</h2>
+        <div class="link-container">
+            <a href="http://127.0.0.1:8000/auth">切换模式</a>
+        </div>
+    </div>
 </body>
 </html>

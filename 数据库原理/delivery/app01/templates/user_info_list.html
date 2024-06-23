@@ -1,47 +1,81 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% comment %} <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/css/bootstrap.min.css"> {% endcomment %}
-    <!-- bootstrap -->
     <meta charset="UTF-8">
     <title>用户列表</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .btn {
+            margin-right: 10px;
+        }
+        .link-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<h1>用户列表</h1>
-
-<a href="/user/add/">添加</a>
-
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>姓名</th>
-            <th>密码</th>
-            <th>电话</th>
-            <th>地址</th>
-            <th>操作</th>
-        </tr>
-    </head>
-    <tbody>
-    {% for obj in data_list %}
-        <tr>
-            <td>{{ obj.id }}</td>
-            <td>{{ obj.name }}</td>
-            <td>{{ obj.password }}</td>
-            <td>{{ obj.phone }}</td>
-            <td>{{ obj.address }}</td>
-            <td>
-                <a href="/user/edit/{{ obj.id }}/">编辑</a>
-                <a href="/user/delete/{{ obj.id }}/">删除</a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<div></div>
-<a href="/auth/">返回</a>
+    <div class="container">
+        <h1>用户列表</h1>
+        <div class="text-right">
+            <a href="/user/add/" class="btn btn-success">添加</a>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>姓名</th>
+                    <th>密码</th>
+                    <th>电话</th>
+                    <th>地址</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for obj in data_list %}
+                <tr>
+                    <td>{{ obj.id }}</td>
+                    <td>{{ obj.name }}</td>
+                    <td>{{ obj.password }}</td>
+                    <td>{{ obj.phone }}</td>
+                    <td>{{ obj.address }}</td>
+                    <td>
+                        <a href="/user/edit/{{ obj.id }}/" class="btn btn-primary btn-sm">编辑</a>
+                        <a href="/user/delete/{{ obj.id }}/" class="btn btn-danger btn-sm">删除</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="link-container">
+            <a href="/auth/" class="btn btn-default">返回</a>
+        </div>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>
